@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as path from 'path';
 import { databaseProviders } from './database.providers';
 import { groupProviders } from './providers/groups.providers';
+import { contactProviders } from './providers/contact.providers';
 
 const envFilePath = path.resolve(__dirname, `../../../../.env`);
 
@@ -14,6 +15,6 @@ const envFilePath = path.resolve(__dirname, `../../../../.env`);
       isGlobal: true,
     }),
   ],
-  providers: [...databaseProviders, ...groupProviders],
+  providers: [...databaseProviders, ...groupProviders, ...contactProviders],
 })
 export class DatabaseModule {}
