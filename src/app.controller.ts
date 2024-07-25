@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Groups } from './adapter/database/entities/group.entity';
+import { Group } from './adapter/database/entities/group.entity';
 
 @Controller()
 export class AppController {
@@ -12,7 +12,7 @@ export class AppController {
   }
   
   @Get('/groups')
-  async getGroups(): Promise<Groups[]> {
+  async getGroups(): Promise<Group[]> {
     const groups = await this.appService.getGroups();
     return groups
   }

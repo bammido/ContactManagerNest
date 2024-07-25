@@ -1,14 +1,8 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import * as path from 'path';
-
-import { DataSource } from 'typeorm';
-
-import { Groups } from './entities/group.entity';
-import { GroupRepository } from './repository/group.repository';
 import { databaseProviders } from './database.providers';
-import { photoProviders } from './providers/groups.provider';
+import { groupProviders } from './providers/groups.providers';
 
 const envFilePath = path.resolve(__dirname, `../../../../.env`);
 
@@ -19,16 +13,7 @@ const envFilePath = path.resolve(__dirname, `../../../../.env`);
       envFilePath,
       isGlobal: true,
     }),
-    // TypeOrmModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    // }),
-    // TypeOrmModule.forFeature([Groups]),
   ],
-  providers: [
-    ...databaseProviders,
-    ...photoProviders  
-  ],
-  // exports: [TypeOrmModule],
+  providers: [...databaseProviders, ...groupProviders],
 })
 export class DatabaseModule {}
