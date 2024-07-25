@@ -1,4 +1,7 @@
 {
+  "extends": ["prettier"],
   "singleQuote": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "plugins": ["prettier"],   
+  "rules": {     "prettier/prettier": ["error", { "endOfLine": "auto" }]   }
 }

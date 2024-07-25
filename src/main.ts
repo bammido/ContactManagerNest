@@ -6,7 +6,16 @@ import * as dotenv from 'dotenv';
 async function bootstrap() {
   dotenv.config();
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
+
+  app.enableCors({
+    origin: '*', // Aqui você pode configurar os domínios permitidos
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    // allowedHeaders: 'Content-Type,Authorization,token',
+  });
+
   await app.listen(3333);
 }
 bootstrap();

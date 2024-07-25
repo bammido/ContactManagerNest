@@ -8,6 +8,7 @@ import { groupProviders } from './adapter/database/providers/groups.providers';
 import { DatabaseModule } from './adapter/database/database.module';
 import { databaseProviders } from './adapter/database/database.providers';
 import { contactProviders } from './adapter/database/providers/contact.providers';
+import { MulterModule } from '@nestjs/platform-express';
 
 const envFilePath = path.resolve(__dirname, '../.env');
 
@@ -19,6 +20,7 @@ const envFilePath = path.resolve(__dirname, '../.env');
       envFilePath: envFilePath,
       isGlobal: true,
     }),
+    MulterModule.register({ dest: './uploads' })
   ],
   controllers: [AppController],
   providers: [AppService, ...databaseProviders, ...groupProviders, ...contactProviders],
