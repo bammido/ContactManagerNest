@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { GroupRepository } from './adapter/database/repository/group.repository';
+import { Inject, Injectable } from '@nestjs/common';
+// import { GroupRepository } from './adapter/database/repository/group.repository';
 import { Groups } from './adapter/database/entities/group.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AppService {
   constructor(
-    private readonly groupRepository: GroupRepository,
+    @Inject('PHOTO_REPOSITORY')
+    private readonly groupRepository: Repository<Groups>,
   ) {}
 
   getHello(): string {
@@ -13,6 +15,6 @@ export class AppService {
   }
 
   async getGroups(): Promise<Groups[]> {
-    return await this.groupRepository.findAll()
+    return await this.groupRepository.find()
   }
 }

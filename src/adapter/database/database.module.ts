@@ -7,6 +7,8 @@ import { DataSource } from 'typeorm';
 
 import { Groups } from './entities/group.entity';
 import { GroupRepository } from './repository/group.repository';
+import { databaseProviders } from './database.providers';
+import { photoProviders } from './providers/groups.provider';
 
 const envFilePath = path.resolve(__dirname, `../../../../.env`);
 
@@ -17,44 +19,16 @@ const envFilePath = path.resolve(__dirname, `../../../../.env`);
       envFilePath,
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        console.log(configService.get('DB_HOST'))
-
-        return ({
-            type: 'postgres',
-            host: configService.get('DB_HOST'),
-            port: configService.get('DB_PORT') || 1433,
-            username: configService.get('DB_USER'),
-            password: configService.get('DB_PASS'),
-            database: configService.get('DB_NAME'),
-            entities: [__dirname + './entities/*.entity{.ts,.js}'],
-            synchronize: false,
-            logging: ['error', 'warn'],
-            maxQueryExecutionTime: 1200,
-            // extra: {
-            //   options: {
-            //     encrypt: false,
-            //   },
-            // },
-            options: {
-              useUTC: true,
-            },
-            // autoLoadEntities: true,
-          })
-      },
-      inject: [ConfigService],
-    }),
-    TypeOrmModule.forFeature([Groups]),
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    // }),
+    // TypeOrmModule.forFeature([Groups]),
   ],
   providers: [
-    {
-      provide: 'PHOTO_REPOSITORY',
-      useFactory: (dataSource: DataSource) => dataSource.getRepository(Groups),
-      inject: ['DATA_SOURCE'],
-    },
-    GroupRepository],
-  exports: [TypeOrmModule],
+    ...databaseProviders,
+    ...photoProviders  
+  ],
+  // exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

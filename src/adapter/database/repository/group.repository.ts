@@ -1,7 +1,7 @@
 import { Raw, Repository } from 'typeorm';
 import { Groups } from '../entities/group.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GroupRepository {
