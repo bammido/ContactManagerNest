@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from 'typeorm';
+import { Contact } from './contact.entity';
 
 @Entity('Groups')
 export class Group extends BaseEntity {
@@ -10,4 +11,7 @@ export class Group extends BaseEntity {
 
   @Column({ name: 'created_at' })
   createdAt: Date;
+
+  @OneToMany(() => Contact, (contact) => contact.group)
+    contacts: Contact[]
 }

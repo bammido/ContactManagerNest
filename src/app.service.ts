@@ -13,7 +13,6 @@ export class AppService {
 
     @Inject(contactProviders[0].provide)
     private readonly contactRepository: Repository<Contact>,
-
   ) {}
 
   getHello(): string {
@@ -21,10 +20,18 @@ export class AppService {
   }
 
   async getGroups(): Promise<Group[]> {
-    return await this.groupRepository.find()
+    return await this.groupRepository.find({
+      relations: {
+        contacts: true
+      }
+    });
   }
 
   async getContacts(): Promise<Contact[]> {
-    return await this.contactRepository.find()
+    return await this.contactRepository.find({
+      relations: {
+        group: true
+      }
+    });
   }
 }
