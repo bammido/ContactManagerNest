@@ -10,7 +10,6 @@ import { databaseProviders } from './adapter/database/database.providers';
 import { contactProviders } from './adapter/database/providers/contact.providers';
 import { MulterModule } from '@nestjs/platform-express';
 import { userProviders } from './adapter/database/providers/user.providers';
-import { authMiddleware } from './auth.middleware';
 
 const envFilePath = path.resolve(__dirname, '../.env');
 
@@ -33,10 +32,4 @@ const envFilePath = path.resolve(__dirname, '../.env');
     ...userProviders,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(authMiddleware)
-      .forRoutes(...['/contacts', '/groups', '/sendFile']);
-  }
-}
+export class AppModule {}
