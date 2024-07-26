@@ -6,8 +6,10 @@ import { Contact } from './adapter/database/entities/contact.entity';
 import { contactProviders } from './adapter/database/providers/contact.providers';
 
 import * as XLSX from 'xlsx';
-import { promises as fs } from 'fs';
+// import { promises as fs } from 'fs';
 import * as path from 'path';
+import * as Papa from 'papaparse';
+import * as fs from 'fs';
 
 @Injectable()
 export class AppService {
@@ -31,6 +33,59 @@ export class AppService {
     });
   }
 
+  async createOneGroup({
+    groupName,
+    filePath,
+    fileMimetype,
+  }: {
+    groupName: string;
+    filePath: string;
+    fileMimetype: string;
+  }): Promise<{ group: Group; contactsErr?: boolean }> {
+    const newGroup = await this.groupRepository.create({ groupName });
+
+    const insertedGroup = await this.groupRepository.save(newGroup);
+
+    try {
+      const contacts = await this.processFile(filePath, fileMimetype);
+      await this.createManyContacts({
+        contacts,
+        groupId: insertedGroup.id,
+      });
+
+      return { group: newGroup };
+    } catch (error) {
+      return { group: newGroup, contactsErr: true };
+    }
+  }
+
+  async createManyContacts({
+    groupId,
+    contacts,
+  }: {
+    groupId: string;
+    contacts: Contact[];
+  }) {
+    const contactEntities = contacts.map((contact) => ({
+      ...contact,
+      groupId,
+    }));
+
+
+    return await this.contactRepository.insert(contactEntities);
+  }
+
+  async getGroupById(id: string): Promise<Group> {
+    return await this.groupRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        contacts: true,
+      },
+    });
+  }
+
   async getContacts(): Promise<Contact[]> {
     return await this.contactRepository.find({
       relations: {
@@ -39,22 +94,45 @@ export class AppService {
     });
   }
 
-  async processFile(filePath: string): Promise<any> {
-    const fileBuffer = await fs.readFile(filePath);
-    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+  async processFile(filePath: string, fileMimetype: string): Promise<any> {
 
-    // Exemplo de como acessar a primeira planilha
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    const processedData = data.map((row: any[]) => {
-      return {
-        nome: row[0], // Assume que o nome está na primeira coluna
-        numero: row[1], // Assume que o número está na segunda coluna
-      };
-    });
+    switch (fileMimetype) {
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        const workbook = XLSX.readFile(filePath, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    return processedData;
+        const processedData = data.map((row: any[]) => {
+          return {
+            name: row[0],
+            number: row[1],
+          };
+        });
+
+        return processedData;
+
+      case 'text/csv':
+        const fileContentCsv = fs.readFileSync(filePath, 'utf8');
+        const parsedData = Papa.parse(fileContentCsv, { header: false });
+        const contactsCsv = parsedData.data.slice(1).map((row: any[]) => ({
+          name: row[0],
+          number: row[1],
+        }));
+
+        return contactsCsv;
+
+      case 'text/plain':
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const lines = fileContent.split('\n');
+        const contacts = lines.slice(1).map((line) => {
+          const [name, number] = line.split(',');
+          return { name, number: number.replace(/\D/g, '') };
+        });
+        return contacts;
+      default:
+        throw new Error('Unsupported file type');
+    }
   }
 }

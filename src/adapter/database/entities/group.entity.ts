@@ -7,7 +7,7 @@ export class Group extends BaseEntity {
   id: string;
 
   @Column({ name: 'group_name' })
-  name: string;
+  groupName: string;
 
   @Column({ name: 'created_at' })
   createdAt: Date;
