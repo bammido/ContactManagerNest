@@ -8,6 +8,10 @@ import { contactProviders } from './adapter/database/providers/contact.providers
 import * as XLSX from 'xlsx';
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
+import { userProviders } from './adapter/database/providers/user.providers';
+import { User } from './adapter/database/entities/user.entity';
+
+import { SignJWT } from 'jose';
 
 @Injectable()
 export class AppService {
@@ -17,10 +21,36 @@ export class AppService {
 
     @Inject(contactProviders[0].provide)
     private readonly contactRepository: Repository<Contact>,
+
+    @Inject(userProviders[0].provide)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   getHello(): string {
     return 'Hello World!';
+  }
+
+  async login(body: {
+    email: string;
+    password: string;
+  }): Promise<string | null> {
+    const user = await this.userRepository.findOne({
+      where: body,
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    const secretKey = process.env.SECRET;
+    const key = new TextEncoder().encode(secretKey);
+    const token = await new SignJWT({ email: user.email })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('1 day from now')
+      .sign(key);
+
+    return token;
   }
 
   async getGroups(): Promise<Group[]> {
@@ -112,7 +142,7 @@ export class AppService {
     );
     return updateResult;
   }
-  
+
   async deleteOneContact(id: string): Promise<any> {
     const updateResult = await this.contactRepository.delete(id);
     return updateResult;

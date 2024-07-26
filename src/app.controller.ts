@@ -8,15 +8,32 @@ import {
   Param,
   Put,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Group } from './adapter/database/entities/group.entity';
 import { Contact } from './adapter/database/entities/contact.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
+  @Post('/login')
+  async login(
+    @Body() body: { email: string; password: string },
+    @Res() res: Response,
+  ) {
+    const token = await this.appService.login(body);
+
+    if (!token) {
+      res.status(404).send({ message: 'email ou senha incorreto' });
+      return
+    }
+
+    res.status(200).send({ token });
+  }
 
   @Get()
   getHello(): string {

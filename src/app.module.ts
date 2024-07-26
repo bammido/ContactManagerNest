@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AdapterModule } from './adapter/adapter.module';
@@ -9,6 +9,8 @@ import { DatabaseModule } from './adapter/database/database.module';
 import { databaseProviders } from './adapter/database/database.providers';
 import { contactProviders } from './adapter/database/providers/contact.providers';
 import { MulterModule } from '@nestjs/platform-express';
+import { userProviders } from './adapter/database/providers/user.providers';
+import { authMiddleware } from './auth.middleware';
 
 const envFilePath = path.resolve(__dirname, '../.env');
 
@@ -28,6 +30,13 @@ const envFilePath = path.resolve(__dirname, '../.env');
     ...databaseProviders,
     ...groupProviders,
     ...contactProviders,
+    ...userProviders,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(authMiddleware)
+      .forRoutes(...['/contacts', '/groups', '/sendFile']);
+  }
+}

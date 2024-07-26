@@ -4,6 +4,7 @@ import * as path from 'path';
 import { databaseProviders } from './database.providers';
 import { groupProviders } from './providers/groups.providers';
 import { contactProviders } from './providers/contact.providers';
+import { userProviders } from './providers/user.providers';
 
 const envFilePath = path.resolve(__dirname, `../../../../.env`);
 
@@ -15,6 +16,11 @@ const envFilePath = path.resolve(__dirname, `../../../../.env`);
       isGlobal: true,
     }),
   ],
-  providers: [...databaseProviders, ...groupProviders, ...contactProviders],
+  providers: [
+    ...databaseProviders,
+    ...groupProviders,
+    ...contactProviders,
+    ...userProviders,
+  ],
 })
 export class DatabaseModule {}
