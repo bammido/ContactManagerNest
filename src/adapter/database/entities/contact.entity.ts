@@ -13,9 +13,8 @@ export class Contact extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: string;
 
-  
-  @Column({ name: 'group_id'})
-  groupId:string
+  @Column({ name: 'group_id' })
+  groupId: string;
 
   @Column({ name: 'name' })
   name: string;

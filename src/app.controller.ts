@@ -6,6 +6,8 @@ import {
   UploadedFile,
   UseInterceptors,
   Param,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Group } from './adapter/database/entities/group.entity';
@@ -55,15 +57,43 @@ export class AppController {
     return contacts;
   }
 
+  @Post('/contacts')
+  async postContact(
+    @Body() body: { name: string; number: string; groupId: string },
+  ): Promise<Contact> {
+    const contact = await this.appService.createOneContact(body);
+    return contact;
+  }
+
+  @Put('/contacts')
+  async putContact(
+    @Body() body: { name: string; number: string; groupId: string; id: string },
+  ): Promise<Contact> {
+    const contact = await this.appService.editOneContact(body);
+    return contact;
+  }
+
+  @Delete('/contacts/:id')
+  async deleteContact(@Param('id') id: string): Promise<Contact> {
+    const contact = await this.appService.deleteOneContact(id);
+    return contact;
+  }
+
   @Post('/sendFile')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: FormData,
+    @Body() body: { groupId: string },
   ) {
     const filePath = file?.path;
 
-    const data = await this.appService.processFile(filePath, file.mimetype);
-    return { data };
+    const contacts = await this.appService.processFile(filePath, file.mimetype);
+
+    const insertedContacts = await this.appService.createManyContacts({
+      contacts,
+      groupId: body.groupId,
+    });
+
+    return insertedContacts;
   }
 }

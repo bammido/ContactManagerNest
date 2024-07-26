@@ -6,8 +6,6 @@ import { Contact } from './adapter/database/entities/contact.entity';
 import { contactProviders } from './adapter/database/providers/contact.providers';
 
 import * as XLSX from 'xlsx';
-// import { promises as fs } from 'fs';
-import * as path from 'path';
 import * as Papa from 'papaparse';
 import * as fs from 'fs';
 
@@ -64,13 +62,12 @@ export class AppService {
     contacts,
   }: {
     groupId: string;
-    contacts: Contact[];
+    contacts: { name: string; number: string }[];
   }) {
     const contactEntities = contacts.map((contact) => ({
       ...contact,
       groupId,
     }));
-
 
     return await this.contactRepository.insert(contactEntities);
   }
@@ -94,9 +91,37 @@ export class AppService {
     });
   }
 
-  async processFile(filePath: string, fileMimetype: string): Promise<any> {
+  async createOneContact(newContact: {
+    name: string;
+    number: string;
+    groupId: string;
+  }): Promise<Contact> {
+    const newContactEntity = await this.contactRepository.create(newContact);
+    return await this.contactRepository.save(newContactEntity);
+  }
 
+  async editOneContact(newContact: {
+    name: string;
+    number: string;
+    id: string;
+    groupId: string;
+  }): Promise<any> {
+    const updateResult = await this.contactRepository.update(
+      newContact.id,
+      newContact,
+    );
+    return updateResult;
+  }
+  
+  async deleteOneContact(id: string): Promise<any> {
+    const updateResult = await this.contactRepository.delete(id);
+    return updateResult;
+  }
 
+  async processFile(
+    filePath: string,
+    fileMimetype: string,
+  ): Promise<{ name: string; number: string }[]> {
     switch (fileMimetype) {
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         const workbook = XLSX.readFile(filePath, { type: 'buffer' });

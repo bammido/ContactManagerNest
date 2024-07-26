@@ -20,9 +20,14 @@ const envFilePath = path.resolve(__dirname, '../.env');
       envFilePath: envFilePath,
       isGlobal: true,
     }),
-    MulterModule.register({ dest: './uploads' })
+    MulterModule.register({ dest: './uploads' }),
   ],
   controllers: [AppController],
-  providers: [AppService, ...databaseProviders, ...groupProviders, ...contactProviders],
+  providers: [
+    AppService,
+    ...databaseProviders,
+    ...groupProviders,
+    ...contactProviders,
+  ],
 })
 export class AppModule {}
